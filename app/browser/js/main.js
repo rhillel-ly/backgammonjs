@@ -160,11 +160,14 @@ function App() {
 
     client.subscribe(comm.Message.CREATE_GUEST, function (msg, params) {
       if (!params.reconnected) {
-        // Get matchID from query string (?join=123456)
-        var matchID = parseInt((location.search.split('join=')[1] || '').split('&')[0], 10);
+       // Get host slug from query string (?host=hillel)
+var hostSlug = (location.search.split('host=')[1] || '').split('&')[0];
 
-        // Join game
-        client.reqJoinMatch(matchID);
+if (hostSlug) {
+
+  client.reqJoinMatch(null, hostSlug.trim().toLowerCase());
+
+}
 
         // Remove query string from URL
         if (history.pushState) {
@@ -199,7 +202,7 @@ function App() {
         if (!serverURL) {
           serverURL = window.location.protocol + '//' + window.location.host + '/';
         }
-        $('#challenge-link').val(serverURL + '?join=' + reply.matchID);
+        $('#challenge-link').val(serverURL + '?host=' + reply.player.name.toLowerCase());
         self.setIsChallenging(true);
         self.updateView();
       });
