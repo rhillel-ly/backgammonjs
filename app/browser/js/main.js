@@ -207,7 +207,27 @@ if (hostSlug) {
       self.updateView();
 
       // TODO: Store selected rule in cookie
-      client.reqCreateMatch(self.getSelectedRuleName(), function (msg, clientMsgSeq, reply) {
+      // ICCJ FIX — pass hostSlug to server
+
+var hostSlug = '';
+
+var hostSlugRaw = (location.search.split('host=')[1] || '').split('&')[0];
+
+try {
+  hostSlug = decodeURIComponent(hostSlugRaw || '');
+} catch (e) {
+  hostSlug = hostSlugRaw || '';
+}
+
+hostSlug = hostSlug.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+client.reqCreateMatch(
+
+  self.getSelectedRuleName(),
+
+  { hostName: hostSlug },
+
+  function (msg, clientMsgSeq, reply) {
         if (!reply.result) {
           self.setIsChallenging(false);
           self.setIsWaiting(false);
