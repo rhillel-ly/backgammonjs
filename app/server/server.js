@@ -157,6 +157,7 @@ function Server() {
           if (match.hostName && match.guestName) match.name = match.hostName + ' vs ' + match.guestName;
           else match.name = match.hostName || ('Match ' + match.id);
         }
+        if (!match.hostSlug && match.hostName) match.hostSlug = iccjSlugify(match.hostName);
       }
 
       console.log("State restored.");
@@ -593,6 +594,7 @@ function Server() {
 
       // ICCJ: name/slug
       match.hostName = otherPlayer.name;
+      match.hostSlug = iccjSlugify(match.hostName);
       match.guestName = player.name;
       match.slug = iccjMatchSlug(match.hostName, match.guestName);
       match.name = (match.hostName && match.guestName) ? (match.hostName + ' vs ' + match.guestName) : ('Match ' + match.id);
@@ -677,6 +679,7 @@ function Server() {
 
     // ICCJ: hostName + initial name/slug
     match.hostName = player.name;
+    match.hostSlug = iccjSlugify(match.hostName);
     match.guestName = null;
     match.slug = iccjMatchSlug(match.hostName, match.guestName);
     match.name = match.hostName || ('Match ' + match.id);
@@ -698,7 +701,7 @@ function Server() {
     // ICCJ: return lobby metadata
     reply.slug = match.slug;
     reply.matchName = match.name;
-
+reply.hostSlug = match.hostSlug;
     return true;
   };
 
@@ -1080,23 +1083,22 @@ function Server() {
 /**
  * Get match by host slug (player name lowercase)
  */
+/**
+ * Get match by host slug (uses iccjSlugify)
+ */
 this.getMatchByHostSlug = function (hostSlug) {
-
-  if (!hostSlug) return null;
-
-  hostSlug = hostSlug.toLowerCase();
+  var needle = iccjSlugify(hostSlug);
+  if (!needle) return null;
 
   for (var i = 0; i < this.matches.length; i++) {
-
     var match = this.matches[i];
 
-    if (match.host && match.host.name &&
-        match.host.name.toLowerCase() === hostSlug) {
+    // Prefer stored hostSlug if present, else derive from host name
+    var hay = match.hostSlug
+      ? iccjSlugify(match.hostSlug)
+      : (match.host && match.host.name ? iccjSlugify(match.host.name) : '');
 
-      return match;
-
-    }
-
+    if (hay && hay === needle) return match;
   }
 
   return null;
