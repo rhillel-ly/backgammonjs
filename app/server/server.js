@@ -713,7 +713,9 @@ function Server() {
       return false;
     }
     
-    var match = this.getMatchByID(params.matchID);
+   var match = params.hostSlug
+  ? this.getMatchByHostSlug(params.hostSlug)
+  : this.getMatchByID(params.matchID);
     if (!match) {
       reply.errorMessage = 'Match with ID ' + params.matchID + ' not found!';
       return false;
@@ -1075,7 +1077,30 @@ function Server() {
     }
     return null;
   };
+/**
+ * Get match by host slug (player name lowercase)
+ */
+this.getMatchByHostSlug = function (hostSlug) {
 
+  if (!hostSlug) return null;
+
+  hostSlug = hostSlug.toLowerCase();
+
+  for (var i = 0; i < this.matches.length; i++) {
+
+    var match = this.matches[i];
+
+    if (match.host && match.host.name &&
+        match.host.name.toLowerCase() === hostSlug) {
+
+      return match;
+
+    }
+
+  }
+
+  return null;
+};
 }
 
 var server = new Server();
