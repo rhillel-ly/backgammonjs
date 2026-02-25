@@ -160,12 +160,22 @@ function App() {
 
     client.subscribe(comm.Message.CREATE_GUEST, function (msg, params) {
       if (!params.reconnected) {
-       // Get host slug from query string (?host=hillel)
-var hostSlug = (location.search.split('host=')[1] || '').split('&')[0];
+// Get host slug from query string (?host=hillel)
+var hostSlugRaw = (location.search.split('host=')[1] || '').split('&')[0];
+
+var hostSlug = '';
+
+try {
+  hostSlug = decodeURIComponent(hostSlugRaw || '');
+} catch (e) {
+  hostSlug = hostSlugRaw || '';
+}
+
+hostSlug = hostSlug.trim().toLowerCase();
 
 if (hostSlug) {
 
-  client.reqJoinMatch(null, hostSlug.trim().toLowerCase());
+  client.reqJoinMatch(null, hostSlug);
 
 }
 
@@ -202,7 +212,13 @@ if (hostSlug) {
         if (!serverURL) {
           serverURL = window.location.protocol + '//' + window.location.host + '/';
         }
-        $('#challenge-link').val(serverURL + '?host=' + reply.player.name.toLowerCase());
+        var hostSlug = (reply.hostSlug || reply.player.name || '').toString()
+  .trim()
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
+$('#challenge-link').val(serverURL + '?host=' + encodeURIComponent(hostSlug));
         self.setIsChallenging(true);
         self.updateView();
       });
